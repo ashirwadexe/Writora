@@ -54,7 +54,7 @@ export const register = async (req, res) => {
         
     } catch (error) {
         console.log("Registration error: ", error)
-        return res.status(400).json({
+        return res.status(500).json({
             message: error.message
         });
     };
@@ -77,7 +77,7 @@ export const login = async (req, res) => {
 
         let user = await User.findOne({ email });
         if(!user){
-            return res.status(400).json({
+            return res.status(401).json({
                 message: "User not exist, try another email",
                 success: false
             });
@@ -85,7 +85,7 @@ export const login = async (req, res) => {
 
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
         if(!isPasswordCorrect){
-            return res.status(400).json({
+            return res.status(401).json({
                 message: "Wrong Password",
                 success: false
             });
@@ -103,11 +103,10 @@ export const login = async (req, res) => {
             email: user.email
         };
 
-        return res.status(200).cookie("token", token, {maxAge: 1*24*60*60*1000, httpsOnly: true, sameSite: 'strict'}).json({
+        return res.status(200).cookie("token", token, {maxAge: 1*24*60*60*1000, httpOnly: true, sameSite: 'strict'}).json({
             message: `Welcome, ${user.name}!`,
             success: true,
-            user,
-            token
+            user
         });
         
     } catch (error) {
@@ -121,7 +120,7 @@ export const login = async (req, res) => {
 // GET: /api/users/logout
 export const logout = async (req, res) => {
     try {
-        return res.status(200).cookie("token", "", {maxAge: 0}).json({
+        return res.status(200).cookie("token", "", {maxAge: 0, httpOnly: true, sameSite: 'strict'}).json({
             message: "Logged out!!!",
             success: true
         });
@@ -136,6 +135,7 @@ export const logout = async (req, res) => {
 // GET: /api/users/profile
 export const getProfile = async (req, res) => {
     try {
+        // yaha pe req.user --> isAUthenticated me decode user se fetch kr ke de raha hai
         const { _id, name, email } = req.user;
         
         return res.status(200).json({
