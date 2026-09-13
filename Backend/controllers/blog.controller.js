@@ -1,5 +1,5 @@
 import { Blog } from "../models/blog.model.js";
-import { createBlogSchema } from "../validators/blog.validator.js";
+import { createBlogSchema, updateBlogSchema } from "../validators/blog.validator.js";
 
 
 // POST: /api/blog/create
@@ -77,6 +77,93 @@ export const myBlogs = async (req, res) => {
         
     } catch (error) {
         console.log("Error in getting my-blogs:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
+    };
+};
+
+// GET: /api/blog/:id
+export const getBlogById = async (req, res) => {
+    try {
+        const blogId = req.params.id;
+        const blog = await Blog.findById(blogId);
+
+        if (!blog) {
+            return res.status(404).json({
+                success: false,
+                message: "Blog not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            blog
+        });
+
+    } catch (error) {
+        console.log("Error in getting blogs by id:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
+    };
+};
+
+// PATCH: /api/blog/update-blog/:id
+export const updateBlog = async (req, res) => {
+    try {
+        const blogId = req.params.id;
+        const blog = await Blog.findById(blogId);
+
+        // Blog exist krta hia nhi ?
+        if(!blog){
+            return res.status(400).json({
+                message: "Blog not found!",
+                success: false
+            });
+        };
+
+        const userId = req.user._id;
+
+        // checking blogs is of the logged-in user or not
+        if(blog.author.toString() !== userId.toString()){
+            return res.status(403).json({
+                message: "You are not allowed to update this blog",
+                success: false
+            });
+        };
+
+        // fronted se aaya hua data lo update krne ke liye
+        const result = updateBlogSchema.safeParse(req.body);
+        if(!result.success){
+            return res.status(400).json({
+                message: "Invalid content",
+                success: false,
+                error: result.error.flatten()
+            });
+        };
+
+        const { title, content, category, tags} = result.data;
+
+        // content ko update kro
+        blog.title = title;
+        blog.content = content;
+        blog.category = category;
+        blog.tags = tags;
+
+        // updated blog ko save kro
+        await blog.save();
+
+        return res.status(200).json({
+            message: "Blog Updated!",
+            success: true,
+            blog
+        });
+
+    } catch (error) {
+        console.log("Error in updating a blog by id:", error);
         return res.status(500).json({
             message: "Internal server error",
             success: false
