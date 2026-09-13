@@ -58,5 +58,28 @@ export const getAllBlogs = async (req, res) => {
             message: "Internal server error",
             success: false
         });
-    }
-}
+    };
+};
+
+// GET: /api/blog/my-blogs
+export const myBlogs = async (req, res) => {
+    try {
+
+        const userId = req.user;
+
+        const my_blogs = await Blog.find({author: userId._id})
+
+        return res.status(200).json({
+            message: "All my-blogs fetched successfully",
+            success: true,
+            my_blogs
+        });
+        
+    } catch (error) {
+        console.log("Error in getting my-blogs:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
+    };
+};
