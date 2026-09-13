@@ -119,7 +119,7 @@ export const updateBlog = async (req, res) => {
 
         // Blog exist krta hia nhi ?
         if(!blog){
-            return res.status(400).json({
+            return res.status(404).json({
                 message: "Blog not found!",
                 success: false
             });
@@ -138,7 +138,7 @@ export const updateBlog = async (req, res) => {
         // fronted se aaya hua data lo update krne ke liye
         const result = updateBlogSchema.safeParse(req.body);
         if(!result.success){
-            return res.status(400).json({
+            return res.status(403).json({
                 message: "Invalid content",
                 success: false,
                 error: result.error.flatten()
@@ -162,6 +162,47 @@ export const updateBlog = async (req, res) => {
             blog
         });
 
+    } catch (error) {
+        console.log("Error in updating a blog by id:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
+    };
+};
+
+// DELETE: /api/blog/delete/:id
+export const deleteBlog = async (req, res) => {
+    try {
+        // Find blog
+        const blogId = req.params.id;
+        const blog = await Blog.findById(blogId);
+
+        if(!blog){
+            return res.status(404).json({
+                message: "Blog not found!",
+                success: false
+            });
+        };
+
+        // Get logged in user's id
+        const userId = req.user._id;
+        // Check owenership
+        if(blog.author.toString() !== userId.toString()){
+            return res.status(403).json({
+                message: "You cannot delete this blog!",
+                success: false
+            });
+        };
+
+        // Delete blog
+        await Blog.findByIdAndDelete(blogId);
+
+        return res.status(200).json({
+            message: "Blog Deleted!",
+            success: true
+        });
+        
     } catch (error) {
         console.log("Error in updating a blog by id:", error);
         return res.status(500).json({
