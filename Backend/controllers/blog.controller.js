@@ -42,14 +42,33 @@ export const createBlog = async (req, res) => {
 };
 
 // GET: /api/blog/
+// Pagination Feature
+// Limit -- 5 Blogs on each page
 export const getAllBlogs = async (req, res) => {
     try {
-        const blogs = await Blog.find();
+        const page = Number(req.query.page) || 1;
+        const limit = 5;
+
+        const skip = (page - 1) * limit;
+
+        const blogs = await Blog.find()
+                        .sort({createdAt: -1})
+                        .skip(skip)
+                        .limit(limit)
+        
+        const totalBlogs = await Blog.countDocuments();
+        const totalPages = Math.ceil(totalBlogs / limit);
 
         return res.status(200).json({
-            message: "All blogs fetched successfully",
-            success: true,
-            blogs
+            success:true,
+            blogs,
+            pagination: {
+                currentPage: page,
+                totalBlogs,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1
+            }
         });
         
     } catch (error) {
