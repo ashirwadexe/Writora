@@ -1,0 +1,8 @@
+import express from 'express';
+import isAuthenticated from '../middleware/isAuthenticated.js';
+import { createBlog } from '../controllers/blog.controller.js';
+const router = express.Router();
+
+router.route("/create-blog").post(isAuthenticated, createBlog);
+
+export default router

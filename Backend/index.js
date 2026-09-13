@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import { connectDB } from './configs/db.js';
 import userRouter from './routes/user.route.js'
+import blogRouter from './routes/blog.route.js'
 
 // forcing nodejs to use google or cloudflare's dns server
 import dns from "dns";
@@ -22,6 +23,7 @@ app.get('/', (req,res) => {
 
 // api's
 app.use("/api/users", userRouter);
+app.use("/api/blog", blogRouter)
 
 
 app.listen(PORT, () => {
