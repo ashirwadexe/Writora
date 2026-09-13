@@ -25,7 +25,8 @@ const isAuthenticated = async (req, res, next) => {
 
         // 3. Find the user in MongoDB using the userId
         // that we extracted from the verified JWT.
-        const user = await User.findById(decode.userId);
+        // ab user me password nhi store hoga --> .select("-password")
+        const user = await User.findById(decode.userId).select("-passoword");
 
         // If no user exists with this ID, the token belongs to
         // a user that no longer exists in the database.
