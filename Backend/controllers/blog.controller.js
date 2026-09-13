@@ -40,3 +40,23 @@ export const createBlog = async (req, res) => {
         });
     };
 };
+
+// GET: /api/blog/
+export const getAllBlogs = async (req, res) => {
+    try {
+        const blogs = await Blog.find();
+
+        return res.status(200).json({
+            message: "All blogs fetched successfully",
+            success: true,
+            blogs
+        });
+        
+    } catch (error) {
+        console.log("Error in getting all blogs:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
+    }
+}
