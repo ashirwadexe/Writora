@@ -17,7 +17,7 @@ export const createBlog = async (req, res) => {
 
         const userId = req.user;
 
-        const { title, content, category, tags } = result.data;
+        const { title, content, category, tags, readTime } = result.data;
 
         const blog = await Blog.create({
             title,
@@ -25,6 +25,7 @@ export const createBlog = async (req, res) => {
             author: userId._id,
             category,
             tags,
+            readTime
         });
 
         return res.status(200).json({

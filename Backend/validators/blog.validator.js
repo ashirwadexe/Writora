@@ -19,7 +19,10 @@ export const createBlogSchema = z.object({
 
     tags: z
         .array(z.string())
-        .optional()
+        .optional(),
+
+    readTime: z
+        .string()
 });
 
 export const updateBlogSchema = z.object({

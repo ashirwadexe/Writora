@@ -23,6 +23,10 @@ const blogSchema = new mongoose.Schema({
     tags: [{
         type: String
     }],
+    readTime: {
+        type: String,
+        required: true
+    }
 },{ timestamps: true});
 
 export const Blog = mongoose.model("Blog", blogSchema);
