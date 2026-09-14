@@ -1,5 +1,4 @@
-import { success } from "zod";
-import { Blog } from "../models/blog.model.js";
+import Blog from "../models/blog.model.js";
 import { createBlogSchema, updateBlogSchema } from "../validators/blog.validator.js";
 
 

@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import { loginUserSchema, registerUserSchema } from "../validators/user.validator.js";
 import jwt from "jsonwebtoken";
+import Blog from "../models/blog.model.js";
 
 // POST: api/users/register
 export const register = async (req, res) => {
@@ -165,3 +166,35 @@ export const getProfile = async (req, res) => {
         });
     };
 };
+
+// DELETE: /api/users/delete-account
+export const deleteUserAccount = async  (req, res) => {
+    try {
+        const userId = req.user;
+
+        if(!userId) {
+            return res.status(400).json({
+                message: "Account not exist",
+                success: false
+            });
+        };
+
+        // 1st delete all the blogs of this user
+        // isse ab hamara user or blog dono delte hoga or blog stats update ho payenge
+        await Blog.deleteMany({ author: userId})
+
+        // Now, delete user from db
+        await User.findByIdAndDelete(userId);
+
+        return res.status(200).json({
+            message: "Account deleted!",
+            success: true
+        });
+
+    } catch (error) {
+        console.log("Account delete error: ", error)
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+}
