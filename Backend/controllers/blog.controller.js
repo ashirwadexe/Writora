@@ -184,7 +184,13 @@ export const getBlogById = async (req, res) => {
 export const updateBlog = async (req, res) => {
     try {
         const blogId = req.params.id;
-        const blog = await Blog.findById(blogId);
+        const userId = req.user._id;
+
+        // This will ensure that only blog owner can update this blog
+        const blog = await Blog.findOne({
+            _id: blogId,
+            author: userId
+        });
 
         // Blog exist krta hia nhi ?
         if(!blog){
@@ -194,7 +200,6 @@ export const updateBlog = async (req, res) => {
             });
         };
 
-        const userId = req.user._id;
 
         // checking blogs is of the logged-in user or not
         if(blog.author.toString() !== userId.toString()){
