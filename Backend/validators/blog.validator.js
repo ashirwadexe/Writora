@@ -22,7 +22,8 @@ export const createBlogSchema = z.object({
         .optional(),
 
     readTime: z
-        .string()
+        .number()
+        .min(1, 'Read time must be at least 1 minute')
 });
 
 export const updateBlogSchema = z.object({
@@ -44,6 +45,10 @@ export const updateBlogSchema = z.object({
 
     tags: z
         .array(z.string())
-        .optional()
+        .optional(),
+
+    readTime: z
+        .number()
+        .min(1, 'Read time must be at least 1 minute')
 });
 

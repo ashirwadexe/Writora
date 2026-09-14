@@ -119,6 +119,41 @@ export const myBlogs = async (req, res) => {
     };
 };
 
+// GET: /api/blog/stats
+export const getBlogStats = async (req, res) => {
+    try {
+        // mongodb aggreagte ko use kr ke ham blogs ki properties pe operation perform kr sakte hai
+        const stats = await Blog.aggregate([
+            {
+                // $group --> sahi blogs ke ek group me daal raha hai unke id ko null kr ke
+                $group: {
+                    _id: null,
+                    totalStories: {$sum: 1},
+                    avgReadTime: {$avg: "$readTime"}
+                }
+            }
+        ]);
+
+        const activeWriters = await Blog.distinct("author");
+
+        return res.status(200).json({
+            success: true,
+            stats: {
+                totalStories: stats[0]?.totalStories || 0,
+                activeWriters: activeWriters.length,
+                avgReadTime: stats[0]?.avgReadTime
+            }
+        });
+
+    } catch (error) {
+        console.log("Error in getting blog stats:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
+    }
+}
+
 // GET: /api/blog/:id
 export const getBlogById = async (req, res) => {
     try {
@@ -180,13 +215,14 @@ export const updateBlog = async (req, res) => {
             });
         };
 
-        const { title, content, category, tags} = result.data;
+        const { title, content, category, tags, readTime} = result.data;
 
         // content ko update kro
         blog.title = title;
         blog.content = content;
         blog.category = category;
         blog.tags = tags;
+        blog.readTime = readTime;
 
         // updated blog ko save kro
         await blog.save();
