@@ -2,26 +2,19 @@ import Blog from "../models/blog.model.js";
 import { generateAIContent } from "../services/ai.services.js";
 import { writeBlogSchema } from "../validators/ai.validator.js";
 
-// Generate a blog using AI
+// POST: /api/ai/write-blog
 export const generateBlog = async (req, res) => {
   try {
-    // Step 1: Validate user input
-    const validation = writeBlogSchema.safeParse(req.body);
-
-    if (!validation.success) {
-      return res.status(400).json({
+    const result = writeBlogSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(401).json({
+        message: "validation failed!",
         success: false,
-        message: "Please provide a valid blog topic.",
       });
     }
 
-    const {
-      topic,
-      language = "English",
-      tone = "Informative",
-    } = validation.data;
+    const { topic, language = "English", tone = "Informative" } = result.data;
 
-    // Step 2: Prepare instructions for the AI
     const prompt = `
       You are a professional blog writer for Writora.
 
@@ -40,18 +33,17 @@ export const generateBlog = async (req, res) => {
       - Return the blog content in readable Markdown.
     `;
 
-    // Step 3: Ask the AI service to generate the blog
     const content = await generateAIContent(prompt);
 
-    // Step 4: Send the generated content to the frontend
-    return res.status(200).json({
-      success: true,
-      message: "Blog generated successfully.",
-      data: {
-        topic,
-        content,
-      },
+    return res.status(201).json({
+        message: "Blog generated successfully!",
+        success: true,
+        data: {
+            topic,
+            content
+        }
     });
+
   } catch (error) {
     console.error("AI blog generation failed:", error.message);
     return res.status(500).json({
@@ -61,22 +53,18 @@ export const generateBlog = async (req, res) => {
   }
 };
 
-
+// POST: /api/ai/summarize/:blogId
 export const summarizeBlog = async (req, res) => {
   try {
-    // 1. Get the blog ID from the URL
     const { blogId } = req.params;
-
-    // 2. Find the existing blog in MongoDB
     const blog = await Blog.findById(blogId).select("title content");
     if (!blog) {
       return res.status(404).json({
+        message: "Blog not found!",
         success: false,
-        message: "Blog not found.",
       });
     }
 
-    // 3. Prepare the summary prompt
     const prompt = `
       You are an expert article summarizer.
 
@@ -94,13 +82,11 @@ export const summarizeBlog = async (req, res) => {
       ${blog.content}
     `;
 
-    // 4. Generate the summary using our existing AI service
     const summary = await generateAIContent(prompt);
 
-    // 5. Return the summary to the frontend
-    return res.status(200).json({
+    return res.status(201).json({
+      message: "Summary generated successful!",
       success: true,
-      message: "Summary generated successfully.",
       data: {
         blogId: blog._id,
         title: blog.title,
@@ -109,7 +95,6 @@ export const summarizeBlog = async (req, res) => {
     });
   } catch (error) {
     console.error("AI summary failed:", error.message);
-
     return res.status(500).json({
       success: false,
       message: "Unable to generate summary right now.",
