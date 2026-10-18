@@ -4,6 +4,7 @@ import { connectDB } from './configs/db.js';
 import userRouter from './routes/user.route.js';
 import blogRouter from './routes/blog.route.js';
 import likeRouter from './routes/like.route.js';
+import commentRouter from './routes/comment.route.js';
 
 // forcing nodejs to use google or cloudflare's dns server
 import dns from "dns";
@@ -26,6 +27,7 @@ app.get('/', (req,res) => {
 app.use("/api/auth", userRouter);
 app.use("/api/blog", blogRouter)
 app.use("/api/likes", likeRouter);
+app.use("/api/blog", commentRouter);
 
 const startServer = async () => {
     try {
