@@ -22,7 +22,7 @@ app.get('/', (req,res) => {
 });
 
 // api's
-app.use("/api/users", userRouter);
+app.use("/api/auth", userRouter);
 app.use("/api/blog", blogRouter)
 
 const startServer = async () => {

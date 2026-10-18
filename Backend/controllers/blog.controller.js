@@ -1,46 +1,74 @@
+import mongoose from "mongoose";
+import uploadToCloudinary from "../configs/uploadToCloudinary.js";
 import Blog from "../models/blog.model.js";
 import { createBlogSchema, updateBlogSchema } from "../validators/blog.validator.js";
 
 
 // POST: /api/blog/create
+
 export const createBlog = async (req, res) => {
-    try {
-        const result = createBlogSchema.safeParse(req.body);
-        if(!result.success){
-            return res.status(400).json({
-                message: "Invalid content",
-                success: false,
-                error: result.error.flatten()
-            });
-        };
+  try {
+    // FormData sends text fields as strings.
+    const body = { ...req.body };
 
-        const userId = req.user;
+    if (body.readTime !== undefined) {
+      body.readTime = Number(body.readTime);
+    }
 
-        const { title, content, category, tags, readTime } = result.data;
+    if (typeof body.tags === "string") {
+      try {
+        body.tags = JSON.parse(body.tags);
+      } catch {
+        // Invalid JSON will fail Zod's array validation.
+      }
+    }
 
-        const blog = await Blog.create({
-            title,
-            content,
-            author: userId._id,
-            category,
-            tags,
-            readTime
-        });
+    const result = createBlogSchema.safeParse(body);
 
-        return res.status(200).json({
-            message: "Blog posted!!!",
-            success: true,
-            blog
-        });
-     
-    } catch (error) {
-        console.log("Error in create blog:", error);
-        return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
-    };
+    if (!result.success) {
+      return res.status(400).json({
+        message: "Invalid content",
+        success: false,
+        error: result.error.flatten()
+      });
+    }
+
+    const userId = req.user._id;
+    const { title, content, category, tags, readTime } = result.data;
+
+    // Upload only after the text fields pass validation.
+    let image = result.data.image;
+
+    if (req.file) {
+      const uploadedImage = await uploadToCloudinary(req.file.buffer);
+      image = uploadedImage.secure_url;
+    }
+
+    const blog = await Blog.create({
+      title,
+      content,
+      author: userId,
+      category,
+      tags,
+      readTime,
+      image
+    });
+
+    return res.status(201).json({
+      message: "Blog posted successfully!",
+      success: true,
+      blog
+    });
+  } catch (error) {
+    console.error("Error in create blog:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false
+    });
+  }
 };
+
 
 // GET: /api/blog/
 // Pagination Feature
@@ -182,74 +210,97 @@ export const getBlogById = async (req, res) => {
 
 // PATCH: /api/blog/update/:id
 export const updateBlog = async (req, res) => {
-    try {
-        const { id: blogId } = req.params;
-        const userId = req.user._id;
+  try {
+    const { id: blogId } = req.params;
+    const userId = req.user._id;
 
-        // 1. Validate the blog ID
-        if (!mongoose.isValidObjectId(blogId)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid blog ID"
-            });
-        }
-
-        // 2. Validate only the fields provided in the request
-        const result = updateBlogSchema.safeParse(req.body);
-
-        if (!result.success) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid blog data",
-                errors: result.error.flatten()
-            });
-        }
-
-        // 3. Reject empty updates
-        const updates = result.data;
-
-        if (Object.keys(updates).length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Provide at least one field to update"
-            });
-        }
-
-        // 4. Find the blog owned by the logged-in user
-        const blog = await Blog.findOne({
-            _id: blogId,
-            author: userId
-        });
-
-        if (!blog) {
-            return res.status(404).json({
-                success: false,
-                message: "Blog not found or you are not authorized to update it"
-            });
-        }
-
-        // 5. Update only the fields provided by the client
-        for (const [key, value] of Object.entries(updates)) {
-            blog.set(key, value);
-        }
-
-        // 6. Save the updated document
-        await blog.save();
-
-        return res.status(200).json({
-            success: true,
-            message: "Blog updated successfully",
-            blog
-        });
-
-    } catch (error) {
-        console.error("Error updating blog:", error);
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
+    if (!mongoose.isValidObjectId(blogId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid blog ID"
+      });
     }
+
+    // Normalize multipart FormData values.
+    const body = { ...req.body };
+
+    if (body.readTime !== undefined) {
+      body.readTime = Number(body.readTime);
+    }
+
+    if (typeof body.tags === "string") {
+      try {
+        body.tags = JSON.parse(body.tags);
+      } catch {
+        // Invalid JSON will fail validation.
+      }
+    }
+
+    // Allow image-only updates through the partial schema.
+    const validationBody = {
+      ...body,
+      ...(req.file ? { image: "pending-upload" } : {})
+    };
+
+    const result = updateBlogSchema.safeParse(validationBody);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid blog data",
+        errors: result.error.flatten()
+      });
+    }
+
+    const updates = { ...result.data };
+
+    // Never save the temporary placeholder.
+    if (req.file) {
+      delete updates.image;
+    }
+
+    if (Object.keys(updates).length === 0 && !req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide at least one field to update"
+      });
+    }
+
+    const blog = await Blog.findOne({
+      _id: blogId,
+      author: userId
+    });
+
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found or you are not authorized to update it"
+      });
+    }
+
+    if (req.file) {
+      const uploadedImage = await uploadToCloudinary(req.file.buffer);
+      updates.image = uploadedImage.secure_url;
+    }
+
+    for (const [key, value] of Object.entries(updates)) {
+      blog.set(key, value);
+    }
+
+    await blog.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog updated successfully",
+      blog
+    });
+  } catch (error) {
+    console.error("Error updating blog:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
 };
 
 
