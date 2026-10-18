@@ -9,6 +9,7 @@ import { createBlogSchema, updateBlogSchema } from "../validators/blog.validator
 export const createBlog = async (req, res) => {
   try {
     // FormData sends text fields as strings.
+    // body - shallow copy
     const body = { ...req.body };
 
     if (body.readTime !== undefined) {
@@ -23,6 +24,7 @@ export const createBlog = async (req, res) => {
       }
     }
 
+    // AB yaha pe ham Zod ko data validate krne ke liye req.body na de ke iski shallow copy -> body ko pass kr rhe hai jisme normalized readTime or tags hai.
     const result = createBlogSchema.safeParse(body);
 
     if (!result.success) {
@@ -242,6 +244,7 @@ export const updateBlog = async (req, res) => {
       ...(req.file ? { image: "pending-upload" } : {})
     };
 
+    // yaha pe ham ab Zod ko validationBody de rhe hia jisme converted data ja raha hai zod ke pas validate krne ke liye
     const result = updateBlogSchema.safeParse(validationBody);
 
     if (!result.success) {
