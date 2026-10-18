@@ -5,6 +5,7 @@ import userRouter from './routes/user.route.js';
 import blogRouter from './routes/blog.route.js';
 import likeRouter from './routes/like.route.js';
 import commentRouter from './routes/comment.route.js';
+import aiRouter from './routes/ai.route.js';
 
 // forcing nodejs to use google or cloudflare's dns server
 import dns from "dns";
@@ -28,6 +29,7 @@ app.use("/api/auth", userRouter);
 app.use("/api/blog", blogRouter)
 app.use("/api/likes", likeRouter);
 app.use("/api/blog", commentRouter);
+app.use("/api/ai", aiRouter);
 
 const startServer = async () => {
     try {
