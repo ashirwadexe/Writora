@@ -6,8 +6,8 @@ import blogRouter from './routes/blog.route.js'
 
 // forcing nodejs to use google or cloudflare's dns server
 import dns from "dns";
-import cookieParser from 'cookie-parser';
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
+import cookieParser from 'cookie-parser';
 
 
 const app = express();
@@ -25,8 +25,17 @@ app.get('/', (req,res) => {
 app.use("/api/users", userRouter);
 app.use("/api/blog", blogRouter)
 
+const startServer = async () => {
+    try {
+        await connectDB();
 
-app.listen(PORT, () => {
-    console.log(`app is listening at PORT: ${PORT}`)
-    connectDB()
-});
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error("Server startup failed:", error);
+        process.exit(1);
+    }
+};
+
+startServer();

@@ -170,7 +170,7 @@ export const getProfile = async (req, res) => {
 // DELETE: /api/users/delete-account
 export const deleteUserAccount = async  (req, res) => {
     try {
-        const userId = req.user;
+        const userId = req.user._id;
 
         if(!userId) {
             return res.status(400).json({
@@ -197,4 +197,4 @@ export const deleteUserAccount = async  (req, res) => {
             message: error.message
         });
     }
-}
+};

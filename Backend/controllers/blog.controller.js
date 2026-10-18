@@ -180,71 +180,78 @@ export const getBlogById = async (req, res) => {
     };
 };
 
-// PATCH: /api/blog/update-blog/:id
+// PATCH: /api/blog/update/:id
 export const updateBlog = async (req, res) => {
     try {
-        const blogId = req.params.id;
+        const { id: blogId } = req.params;
         const userId = req.user._id;
 
-        // This will ensure that only blog owner can update this blog
+        // 1. Validate the blog ID
+        if (!mongoose.isValidObjectId(blogId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid blog ID"
+            });
+        }
+
+        // 2. Validate only the fields provided in the request
+        const result = updateBlogSchema.safeParse(req.body);
+
+        if (!result.success) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid blog data",
+                errors: result.error.flatten()
+            });
+        }
+
+        // 3. Reject empty updates
+        const updates = result.data;
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Provide at least one field to update"
+            });
+        }
+
+        // 4. Find the blog owned by the logged-in user
         const blog = await Blog.findOne({
             _id: blogId,
             author: userId
         });
 
-        // Blog exist krta hia nhi ?
-        if(!blog){
+        if (!blog) {
             return res.status(404).json({
-                message: "Blog not found!",
-                success: false
-            });
-        };
-
-
-        // checking blogs is of the logged-in user or not
-        if(blog.author.toString() !== userId.toString()){
-            return res.status(403).json({
-                message: "You are not allowed to update this blog",
-                success: false
-            });
-        };
-
-        // fronted se aaya hua data lo update krne ke liye
-        const result = updateBlogSchema.safeParse(req.body);
-        if(!result.success){
-            return res.status(403).json({
-                message: "Invalid content",
                 success: false,
-                error: result.error.flatten()
+                message: "Blog not found or you are not authorized to update it"
             });
-        };
+        }
 
-        const { title, content, category, tags, readTime} = result.data;
+        // 5. Update only the fields provided by the client
+        for (const [key, value] of Object.entries(updates)) {
+            blog.set(key, value);
+        }
 
-        // content ko update kro
-        blog.title = title;
-        blog.content = content;
-        blog.category = category;
-        blog.tags = tags;
-        blog.readTime = readTime;
-
-        // updated blog ko save kro
+        // 6. Save the updated document
         await blog.save();
 
         return res.status(200).json({
-            message: "Blog Updated!",
             success: true,
+            message: "Blog updated successfully",
             blog
         });
 
     } catch (error) {
-        console.log("Error in updating a blog by id:", error);
+        console.error("Error updating blog:", error);
+
         return res.status(500).json({
-            message: "Internal server error",
-            success: false
+            success: false,
+            message: "Internal server error"
         });
-    };
+    }
 };
+
 
 // DELETE: /api/blog/delete/:id
 export const deleteBlog = async (req, res) => {
