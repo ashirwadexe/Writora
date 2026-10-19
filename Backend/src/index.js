@@ -6,6 +6,7 @@ import blogRouter from './routes/blog.route.js';
 import likeRouter from './routes/like.route.js';
 import commentRouter from './routes/comment.route.js';
 import aiRouter from './routes/ai.route.js';
+import cors from 'cors';
 
 // forcing nodejs to use google or cloudflare's dns server
 import dns from "dns";
@@ -19,6 +20,24 @@ const PORT = process.env.PORT || 5000
 
 app.use(express.json());
 app.use(cookieParser());
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://localhost:5173",
+].filter(Boolean); 
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Allow requests without an Origin header, such as server-to-server requests
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+            return callback(new Error("Not allowed by CORS"));
+        },
+        credentials: true,
+    })
+);
 
 app.get('/', (req,res) => {
     res.send('server is live...')
