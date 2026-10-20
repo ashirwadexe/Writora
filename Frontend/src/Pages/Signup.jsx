@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,25 +13,111 @@ import {
   Sparkles,
   PenLine,
 } from "lucide-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
+import Loader from "../Components/Common/Loader";
 
 const Signup = () => {
+  const [error, setError] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setError((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
+
+  const inputValidation = () => {
+    const newError = {};
+
+    if (!formData.name.trim()) {
+      newError.name = "Name is required!";
+    } else if (formData.name.trim().length < 3) {
+      newError.name = "Name should be of 3 characters!";
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newError.email = "Email is required!";
+    } else if (!emailRegex.test(formData.email)) {
+      newError.email = "Enter a valid email id!";
+    }
+
+    if (!formData.password.trim()) {
+      newError.password = "Password is required!";
+    } else if (formData.password.length < 6) {
+      newError.password = "Password should be of 6 characters!";
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newError.confirmPassword = "Passwords do not match";
+    }
+
+    return newError;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Backend integration will be added later.
+
+    const newError = inputValidation();
+    setError(newError);
+
+    if (Object.keys(newError).length > 0) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const { name, email, password } = formData;
+      const response = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
+
+      toast.success(response.data.message || "Account created!");
+
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+      navigate("/login", { replace: true });
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Error creating account!",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <main className="min-h-screen bg-[#FDFDF1] px-4 py-6 text-[#202020] sm:px-6 sm:py-10">
       <div className="mx-auto max-w-7xl">
-
         {/* Top navigation */}
-        <Link
-          to="/"
-          className="group inline-flex items-center gap-2"
-        >
+        <Link to="/" className="group inline-flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center border-2 border-[#202020] bg-[#EC5E27] shadow-[3px_3px_0px_#202020] transition-all group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-[1px_1px_0px_#202020]">
             <BookOpen size={22} strokeWidth={2.5} color="#FDFDF1" />
           </div>
@@ -43,11 +128,9 @@ const Signup = () => {
         </Link>
 
         <div className="mx-auto grid max-w-5xl items-center gap-10 py-10 sm:py-14 lg:grid-cols-2 lg:gap-16 lg:py-16">
-
           {/* Left panel */}
           <section className="hidden lg:block">
             <div className="relative border-2 border-[#202020] bg-[#F2CB57] p-8 shadow-[8px_8px_0px_#202020] xl:p-10">
-
               <div className="flex items-center gap-2 border-b-2 border-[#202020]/25 pb-5">
                 <PenLine size={20} strokeWidth={2.5} />
 
@@ -65,18 +148,14 @@ const Signup = () => {
               </h1>
 
               <p className="mt-6 max-w-sm text-base font-semibold leading-7">
-                Discover new perspectives, share your knowledge, and give
-                your ideas a place to grow.
+                Discover new perspectives, share your knowledge, and give your
+                ideas a place to grow.
               </p>
 
               <div className="mt-10 border-2 border-[#202020] bg-[#FDFDF1] p-5 shadow-[4px_4px_0px_#202020]">
                 <div className="flex items-start gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#202020] bg-[#EC5E27]">
-                    <Sparkles
-                      size={22}
-                      strokeWidth={2.5}
-                      color="#FDFDF1"
-                    />
+                    <Sparkles size={22} strokeWidth={2.5} color="#FDFDF1" />
                   </div>
 
                   <div>
@@ -97,7 +176,6 @@ const Signup = () => {
 
           {/* Signup form */}
           <section className="mx-auto w-full max-w-md">
-
             <Link
               to="/"
               className="mb-7 inline-flex items-center gap-2 text-sm font-bold text-[#625F56] transition-colors hover:text-[#EC5E27]"
@@ -107,7 +185,6 @@ const Signup = () => {
             </Link>
 
             <div className="border-2 border-[#202020] bg-white p-5 shadow-[6px_6px_0px_#202020] sm:p-8 sm:shadow-[8px_8px_0px_#202020]">
-
               <div className="mb-7">
                 <span className="inline-flex items-center gap-2 border-2 border-[#202020] bg-[#EC5E27] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest">
                   <Sparkles size={14} strokeWidth={2.5} />
@@ -124,7 +201,6 @@ const Signup = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-
                 {/* Full name */}
                 <div>
                   <label
@@ -139,15 +215,22 @@ const Signup = () => {
 
                     <input
                       id="signup-name"
-                      name="name"
                       type="text"
                       autoComplete="name"
                       placeholder="Your name"
                       required
                       className="min-w-0 w-full bg-transparent py-3.5 text-sm font-semibold outline-none placeholder:font-medium placeholder:text-[#99948A]"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
+                {error.name && (
+                  <p className="mt-1 text-sm font-bold text-red-600">
+                    {error.name}
+                  </p>
+                )}
 
                 {/* Email */}
                 <div>
@@ -163,15 +246,22 @@ const Signup = () => {
 
                     <input
                       id="signup-email"
-                      name="email"
                       type="email"
                       autoComplete="email"
                       placeholder="you@example.com"
                       required
                       className="min-w-0 w-full bg-transparent py-3.5 text-sm font-semibold outline-none placeholder:font-medium placeholder:text-[#99948A]"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
+                {error.email && (
+                  <p className="mt-1 text-sm font-bold text-red-600">
+                    {error.email}
+                  </p>
+                )}
 
                 {/* Password */}
                 <div>
@@ -187,32 +277,36 @@ const Signup = () => {
 
                     <input
                       id="signup-password"
-                      name="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
                       placeholder="Create a password"
                       required
-                      minLength={6}
                       className="min-w-0 w-full bg-transparent py-3.5 text-sm font-semibold outline-none placeholder:font-medium placeholder:text-[#99948A]"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
                     />
 
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                       className="shrink-0 p-1 transition-colors hover:text-[#EC5E27]"
                     >
-                      {showPassword ? (
-                        <EyeOff size={19} />
-                      ) : (
-                        <Eye size={19} />
-                      )}
+                      {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                     </button>
                   </div>
-
-                  <p className="mt-1.5 text-xs font-medium text-[#777268]">
-                    Use at least 6 characters.
-                  </p>
+                  {error.password ? (
+                    <p className="mt-1 text-sm font-bold text-red-600">
+                      {error.password}
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 text-xs font-medium text-[#777268]">
+                      Use at least 6 characters.
+                    </p>
+                  )}
                 </div>
 
                 {/* Confirm password */}
@@ -229,20 +323,19 @@ const Signup = () => {
 
                     <input
                       id="signup-confirm-password"
-                      name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       autoComplete="new-password"
                       placeholder="Enter password again"
                       required
-                      minLength={6}
                       className="min-w-0 w-full bg-transparent py-3.5 text-sm font-semibold outline-none placeholder:font-medium placeholder:text-[#99948A]"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
                     />
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowConfirmPassword((prev) => !prev)
-                      }
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
                       aria-label={
                         showConfirmPassword
                           ? "Hide confirm password"
@@ -258,6 +351,11 @@ const Signup = () => {
                     </button>
                   </div>
                 </div>
+                {error.confirmPassword && (
+                  <p className="mt-1 text-sm font-bold text-red-600">
+                    {error.confirmPassword}
+                  </p>
+                )}
 
                 {/* Terms checkbox */}
                 <label className="flex cursor-pointer items-start gap-3 py-1 text-xs font-medium leading-5 text-[#68645B]">
@@ -288,17 +386,24 @@ const Signup = () => {
                 </label>
 
                 {/* Submit */}
+
                 <button
                   type="submit"
-                  className="group flex w-full items-center justify-center gap-2 border-2 border-[#202020] bg-[#EC5E27] px-5 py-3.5 text-sm font-black shadow-[4px_4px_0px_#202020] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#202020] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                  disabled={isLoading}
+                  className="group flex w-full items-center justify-center gap-2 border-2 border-[#202020] bg-[#EC5E27] px-5 py-3.5 text-sm font-black shadow-[4px_4px_0px_#202020] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#202020] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-80"
                 >
-                  Create account
-
-                  <ArrowRight
-                    size={19}
-                    strokeWidth={2.5}
-                    className="transition-transform group-hover:translate-x-1"
-                  />
+                  {isLoading ? (
+                    <Loader text="Creating account..." />
+                  ) : (
+                    <>
+                      Create account
+                      <ArrowRight
+                        size={19}
+                        strokeWidth={2.5}
+                        className="transition-transform group-hover:translate-x-1"
+                      />
+                    </>
+                  )}
                 </button>
               </form>
 

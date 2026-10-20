@@ -12,10 +12,12 @@ import CreateBlog from './Pages/CreateBlog'
 import EditBlog from './Pages/EditBlog'
 import WritoraAI from './Pages/WritoraAI'
 import AccountSettngs from './Pages/AccountSettngs'
+import { Toaster } from "react-hot-toast"
 
 const App = () => {
   return (
     <>
+      <Toaster/>
       <Routes>
         <Route path='/' element={<Home/>} />
         <Route path='/login' element={<Login/>} />
