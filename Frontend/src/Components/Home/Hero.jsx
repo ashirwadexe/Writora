@@ -1,5 +1,3 @@
-
-import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowDown,
@@ -20,20 +18,19 @@ const topics = [
   "Creativity",
 ];
 
-const Hero = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTopic, setActiveTopic] = useState("");
+const Hero = ({ searchQuery, setSearchQuery, activeTopic, setActiveTopic ,onSearch }) => {
 
+  // popular topics me se user topic click krega to vo searchQuery me aa jaegi
   const handleTopicClick = (topic) => {
-    setActiveTopic((current) => (current === topic ? "" : topic));
-    setSearchQuery((current) => (activeTopic === topic ? "" : topic));
+    const nextTopic = activeTopic === topic ? "" : topic;
+    setActiveTopic(nextTopic);
+    setSearchQuery(nextTopic);
   };
 
+  // search button function -> user type kr ke search button click krega to ye trigger hoga
   const handleSearch = (e) => {
     e.preventDefault();
-
-    // Search API integration will be added later.
-    // For now, the search UI and topic selection are ready.
+    onSearch(searchQuery);
   };
 
   return (
@@ -97,13 +94,6 @@ const Hero = () => {
               role="search"
               className="mt-8 max-w-xl"
             >
-              {/* <label
-                htmlFor="hero-search"
-                className="mb-2 block text-xs font-black uppercase tracking-wider"
-              >
-                Find your next read
-              </label> */}
-
               <div className="flex flex-col gap-2 border-2 border-[#202020] bg-white p-2 shadow-[5px_5px_0px_#202020] transition-shadow focus-within:shadow-[3px_3px_0px_#EC5E27] sm:flex-row sm:items-center">
                 <div className="flex min-w-0 flex-1 items-center gap-3 px-2">
                   <Search

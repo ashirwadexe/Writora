@@ -1,15 +1,43 @@
-import Navbar from '../Components/Layout/Navbar';
-import Hero from '../Components/Home/Hero';
-import BlogSection from '../Components/Home/BlogSection';
+import { useState } from "react";
+import Navbar from "../Components/Layout/Navbar";
+import Hero from "../Components/Home/Hero";
+import BlogSection from "../Components/Home/BlogSection";
 
 const Home = () => {
+  // Search input box ki current value
+  const [searchQuery, setSearchQuery] = useState("");
+  // Sirf submit ki gayi search ko apply karenge
+  const [appliedSearch, setAppliedSearch] = useState("");
+  // Pagination kis page par hai
+  const [currentPage, setCurrentPage] = useState(1);
+  // state to handle the active topic in search box
+  const [activeTopic, setActiveTopic] = useState("");
+
+  // Search submit hone par
+  const handleSearch = (query) => {
+    setAppliedSearch(query.trim());
+    setCurrentPage(1);
+  };
+
   return (
     <div>
-      <Navbar/>
-      <Hero/>
-      <BlogSection/>
-    </div>
-  )
-}
+      <Navbar />
 
-export default Home
+      <Hero
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        activeTopic={activeTopic}
+        setActiveTopic={setActiveTopic}
+        onSearch={handleSearch}
+      />
+
+      <BlogSection
+        search={appliedSearch}
+        page={currentPage}
+        onPageChange={setCurrentPage}
+      />
+    </div>
+  );
+};
+
+export default Home;
