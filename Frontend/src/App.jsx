@@ -22,13 +22,13 @@ const App = () => {
         <Route path='/' element={<Home/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/signup' element={<Signup/>} />
-        <Route path='/blogs/:id' element={<BlogDetails/>} />
+        <Route path='/blogs/:blogId' element={<BlogDetails/>} />
 
         <Route path='dashboard' element={<DashboardLayout/>}>
           <Route index element={<Dashboard/>}/>
           <Route path='blogs' element={<MyBlogs/>} />
           <Route path='blogs/new' element={<CreateBlog/>} />
-          <Route path='blogs/:id/edit' element={<EditBlog/>} />
+          <Route path='blogs/:blogId/edit' element={<EditBlog/>} />
           <Route path='ai' element={<WritoraAI/>} />
           <Route path='settings' element={<AccountSettngs/>} />
         </Route>
