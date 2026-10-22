@@ -42,6 +42,8 @@ const Home = () => {
         onPageChange={setCurrentPage}
       />
 
+      <ExploreCategories />
+
       <WriterCTA isAuthenticated={isAuthenticated} />
 
       <Footer />
