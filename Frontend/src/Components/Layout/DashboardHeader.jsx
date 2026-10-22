@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Menu,
@@ -16,13 +15,13 @@ const pageTitles = {
   "/dashboard/ai": "AI Blog Writer",
   "/dashboard/ai": "AI Summary",
   "/dashboard/settings": "Settings",
+  "/dashboard/delete": "Delete Account",
 };
 
 const DashboardHeader = ({ onMenuClick = () => {} }) => {
   const location = useLocation();
 
-  const currentTitle =
-    pageTitles[location.pathname] || "Workspace";
+  const currentTitle = pageTitles[location.pathname] || "Workspace";
 
   return (
     <header className="sticky top-0 z-30 border-b-2 border-[#202020] bg-[#FDFDF1]">
@@ -39,7 +38,9 @@ const DashboardHeader = ({ onMenuClick = () => {} }) => {
 
           <div className="min-w-0">
             <div className="mb-1 hidden items-center gap-2 text-xs font-semibold text-[#888] sm:flex">
-              <span>Writora</span>
+              <Link to="/" className="pointer-cursor">
+                <span>Writora</span>
+              </Link>
               <ChevronRight size={13} />
               <span>Workspace</span>
             </div>
@@ -51,6 +52,7 @@ const DashboardHeader = ({ onMenuClick = () => {} }) => {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* SEARCH BUTTON */}
           <div className="hidden items-center gap-2 rounded-xl border-2 border-[#202020] bg-white px-3 py-2 lg:flex">
             <Search size={17} className="text-[#888]" />
             <input
@@ -63,6 +65,7 @@ const DashboardHeader = ({ onMenuClick = () => {} }) => {
             </kbd>
           </div>
 
+          {/* Notification */}
           <button
             type="button"
             aria-label="Notifications"

@@ -1,6 +1,21 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BookOpen, PlusSquare, Sparkles, Settings, X, PenLine, LogOut, UserRound, ChevronRight } from "lucide-react";
+import React, { useContext, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  BookOpen,
+  PlusSquare,
+  Sparkles,
+  Settings,
+  X,
+  PenLine,
+  LogOut,
+  UserRound,
+  ChevronRight,
+  Trash,
+} from "lucide-react";
+import { AuthContext } from "../../context/authContext";
+import toast from "react-hot-toast";
+import Loader from "../Common/Loader";
 
 const navigation = [
   {
@@ -22,12 +37,34 @@ const navigation = [
 ];
 
 const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const linkClass = ({ isActive }) =>
     `group flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-sm font-bold transition-all ${
       isActive
         ? "border-[#202020] bg-[#F2CB57] text-[#202020] shadow-[3px_3px_0_#202020]"
         : "border-transparent text-[#626262] hover:border-[#202020] hover:bg-[#FDFDF1] hover:text-[#202020]"
     }`;
+
+  // Logout Function
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      const response = await logout();
+      toast.success(response.message || "Logout successful!");
+      navigate("/login");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Error in logout, Try again!",
+      );
+    } finally {
+      setIsLoading(true);
+    }
+  };
 
   return (
     <>
@@ -41,9 +78,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
 
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r-2 border-[#202020] bg-[#FDFDF1] transition-transform duration-300 ${
-          isOpen
-            ? "translate-x-0"
-            : "-translate-x-full md:translate-x-0"
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
         {/* Logo */}
@@ -108,11 +143,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
             Create with AI
           </p>
 
-          <NavLink
-            to="/dashboard/ai"
-            onClick={onClose}
-            className={linkClass}
-          >
+          <NavLink to="/dashboard/ai" onClick={onClose} className={linkClass}>
             <Sparkles size={19} strokeWidth={2.2} />
             <span>AI Studio</span>
 
@@ -126,6 +157,14 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
             Preferences
           </p>
 
+          <NavLink
+            to="/dashboard/delete"
+            onClick={onClose}
+            className={linkClass}
+          >
+            <Trash size={19} strokeWidth={2.2} />
+            <span>Delete Account</span>
+          </NavLink>
           <NavLink
             to="/dashboard/settings"
             onClick={onClose}
@@ -147,7 +186,9 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
               <p className="truncate text-sm font-black text-[#202020]">
                 Your Workspace
               </p>
-              <p className="text-xs text-[#777]">Writer account</p>
+              {
+                user && <p className="text-xs text-[#777]">{user.name}</p>
+              }
             </div>
 
             <ChevronRight size={17} className="text-[#777]" />
@@ -155,10 +196,20 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
 
           <button
             type="button"
+            disabled={isLoading}
+            onClick={handleLogout}
             className="mt-3 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-[#777] transition hover:bg-red-50 hover:text-red-600"
           >
-            <LogOut size={18} />
-            Sign out
+            {isLoading ? (
+              <>
+                <Loader text="Signing out..." />
+              </>
+            ) : (
+              <>
+                <LogOut size={18} />
+                Sign out
+              </>
+            )}
           </button>
         </div>
       </aside>

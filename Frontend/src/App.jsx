@@ -13,6 +13,7 @@ import EditBlog from './Pages/EditBlog'
 import WritoraAI from './Pages/WritoraAI'
 import AccountSettngs from './Pages/AccountSettngs'
 import { Toaster } from "react-hot-toast"
+import DeleteAccount from './Pages/DeleteAccount'
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
           <Route path='blogs/:blogId/edit' element={<EditBlog/>} />
           <Route path='ai' element={<WritoraAI/>} />
           <Route path='settings' element={<AccountSettngs/>} />
+          <Route path='delete' element={<DeleteAccount/>} />
         </Route>
 
         <Route path='*' element={<NotFound404/>} />
