@@ -81,7 +81,7 @@ export const createBlog = async (req, res) => {
 export const getAllBlogs = async (req, res) => {
   try {
     const page = Math.max(1, Number(req.query.page) || 1);
-    const limit = 10;
+    const limit = 6;
     const search = req.query.search || "";
 
     const skip = (page - 1) * limit;
