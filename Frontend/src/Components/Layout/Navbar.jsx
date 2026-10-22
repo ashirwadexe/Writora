@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
   Menu,
@@ -8,9 +8,11 @@ import {
   BookOpen,
   Sparkles,
 } from "lucide-react";
+import { AuthContext } from "../../context/authContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useContext(AuthContext);
 
   const navLinks = [
     { name: "Explore", path: "/" },
@@ -71,18 +73,22 @@ const Navbar = () => {
               )}
             </NavLink>
           ))}
-
-          {/* Simple About Button
-          <button
-            type="button"
-            className="py-2 text-sm font-bold text-[#202020] transition-colors duration-200 hover:text-[#EC5E27]"
-          >
-            About
-          </button> */}
         </div>
 
         {/* Desktop Auth Buttons */}
-        <div className="hidden items-center gap-3 md:flex">
+        {user ? <><div className="hidden items-center gap-3 md:flex">
+          <Link
+            to="/dashboard"
+            className="group inline-flex items-center gap-2 border-2 border-[#202020] bg-[#EC5E27] px-4 py-2.5 text-sm font-black text-[#202020] shadow-[4px_4px_0px_#202020] transition-all duration-200 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#202020] active:translate-x-1 active:translate-y-1 active:shadow-none"
+          >
+            Go to Dashboard
+            <ArrowUpRight
+              size={17}
+              strokeWidth={2.5}
+              className="transition-transform group-hover:rotate-45"
+            />
+          </Link>
+        </div></> : <><div className="hidden items-center gap-3 md:flex">
           <Link
             to="/login"
             className="px-3 py-2 text-sm font-bold text-[#202020] transition-colors hover:text-[#EC5E27]"
@@ -101,7 +107,8 @@ const Navbar = () => {
               className="transition-transform group-hover:rotate-45"
             />
           </Link>
-        </div>
+        </div></>}
+        
 
         {/* Mobile Menu Toggle */}
         <button
