@@ -13,7 +13,7 @@ import EditBlog from './Pages/EditBlog'
 import WritoraAI from './Pages/WritoraAI'
 import AccountSettngs from './Pages/AccountSettngs'
 import { Toaster } from "react-hot-toast"
-import DeleteAccount from './Pages/DeleteAccount'
+import ProtectedRoutes from './routes/ProtectedRoutes'
 
 const App = () => {
   return (
@@ -25,7 +25,7 @@ const App = () => {
         <Route path='/signup' element={<Signup/>} />
         <Route path='/blogs/:blogId' element={<BlogDetails/>} />
 
-        <Route path='dashboard' element={<DashboardLayout/>}>
+        <Route path='dashboard' element={<ProtectedRoutes><DashboardLayout/></ProtectedRoutes>}>
           <Route index element={<Dashboard/>}/>
           <Route path='blogs' element={<MyBlogs/>} />
           <Route path='blogs/new' element={<CreateBlog/>} />
