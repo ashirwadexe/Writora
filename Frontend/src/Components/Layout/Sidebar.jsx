@@ -156,15 +156,6 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           <p className="mb-3 mt-8 px-3 text-[10px] font-black uppercase tracking-[2px] text-[#888]">
             Preferences
           </p>
-
-          <NavLink
-            to="/dashboard/delete"
-            onClick={onClose}
-            className={linkClass}
-          >
-            <Trash size={19} strokeWidth={2.2} />
-            <span>Delete Account</span>
-          </NavLink>
           <NavLink
             to="/dashboard/settings"
             onClick={onClose}

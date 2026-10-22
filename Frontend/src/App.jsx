@@ -32,7 +32,6 @@ const App = () => {
           <Route path='blogs/:blogId/edit' element={<EditBlog/>} />
           <Route path='ai' element={<WritoraAI/>} />
           <Route path='settings' element={<AccountSettngs/>} />
-          <Route path='delete' element={<DeleteAccount/>} />
         </Route>
 
         <Route path='*' element={<NotFound404/>} />
