@@ -307,18 +307,6 @@ const Hero = ({ searchQuery, setSearchQuery, activeTopic, setActiveTopic ,onSear
           </div>
         </div>
 
-        {/* Bottom scroll cue */}
-        <div className="mt-16 flex items-center justify-center gap-3 border-t-2 border-[#202020]/20 pt-6 sm:mt-20 sm:justify-start">
-          <span className="flex h-8 w-8 items-center justify-center border-2 border-[#202020] bg-[#EC5E27]">
-            <ArrowDown size={17} strokeWidth={2.5} />
-          </span>
-
-          <span className="text-xs font-black uppercase tracking-[0.16em]">
-            Scroll less. Discover more.
-          </span>
-
-          <div className="h-0 flex-1 border-t-2 border-dashed border-[#202020]/25" />
-        </div>
       </div>
     </section>
   );

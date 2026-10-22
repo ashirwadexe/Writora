@@ -227,19 +227,6 @@ const BlogSection = ({ search, page, onPageChange }) => {
             </button>
           </div>
         )}
-
-        {/* Bottom divider / note */}
-        <div className="mt-12 flex items-center gap-3 border-t-2 border-[#202020]/20 pt-5">
-          <div className="flex h-8 w-8 items-center justify-center border-2 border-[#202020] bg-[#F2CB57]">
-            <Sparkles size={16} strokeWidth={2.5} />
-          </div>
-
-          <span className="text-[10px] font-black uppercase tracking-[0.15em] sm:text-xs">
-            Read something inspiring. Write something meaningful.
-          </span>
-
-          <div className="flex-1 border-t-2 border-dashed border-[#202020]/25" />
-        </div>
       </div>
     </section>
   );

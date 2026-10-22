@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Navbar from "../Components/Layout/Navbar";
 import Hero from "../Components/Home/Hero";
 import BlogSection from "../Components/Home/BlogSection";
+import ExploreCategories from "../Components/Home/ExploreCategories";
+import Footer from "../Components/Layout/Footer";
+import WriterCTA from "../Components/Home/WritoraCTA";
+import { AuthContext } from "../context/authContext";
 
 const Home = () => {
+  const { isAuthenticated } = useContext(AuthContext);
   // Search input box ki current value
   const [searchQuery, setSearchQuery] = useState("");
   // Sirf submit ki gayi search ko apply karenge
@@ -36,6 +41,10 @@ const Home = () => {
         page={currentPage}
         onPageChange={setCurrentPage}
       />
+
+      <WriterCTA isAuthenticated={isAuthenticated} />
+
+      <Footer />
     </div>
   );
 };
