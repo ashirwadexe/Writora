@@ -1,6 +1,8 @@
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
+import DOMPurify from "dompurify";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark.css";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -20,6 +22,17 @@ const BlogDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // to provide colors to code snippet
+  const contentRef = useRef(null);
+  useEffect(() => {
+    const codeBlocks = contentRef.current?.querySelectorAll("pre code");
+
+    codeBlocks?.forEach((block) => {
+      delete block.dataset.highlighted;
+      hljs.highlightElement(block);
+    });
+  }, [blog?.content]);
+
   useEffect(() => {
     const fetchBlog = async () => {
       try {
@@ -31,7 +44,7 @@ const BlogDetails = () => {
       } catch (err) {
         setError(
           err.response?.data?.message ||
-            "We couldn't load this article. Please try again."
+            "We couldn't load this article. Please try again.",
         );
       } finally {
         setIsLoading(false);
@@ -59,6 +72,7 @@ const BlogDetails = () => {
       ? blog.author?.name || blog.author?.username
       : null;
 
+  // Refresh button
   const retryFetch = async () => {
     try {
       setIsLoading(true);
@@ -66,14 +80,13 @@ const BlogDetails = () => {
       const response = await api.get(`/blog/${blogId}`);
       setBlog(response.data.blog);
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Unable to load this article."
-      );
+      setError(err.response?.data?.message || "Unable to load this article.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Loading state UI
   if (isLoading) {
     return (
       <main className="min-h-screen bg-[#FDFDF1] px-5 py-12 text-[#202020]">
@@ -91,6 +104,7 @@ const BlogDetails = () => {
     );
   }
 
+  // Error state UI
   if (error || !blog) {
     return (
       <main className="flex min-h-[75vh] items-center justify-center bg-[#FDFDF1] px-5 py-16 text-[#202020]">
@@ -209,9 +223,7 @@ const BlogDetails = () => {
               </div>
 
               <div>
-                <p className="text-xs font-bold text-[#68645B]">
-                  Written by
-                </p>
+                <p className="text-xs font-bold text-[#68645B]">Written by</p>
                 <p className="text-sm font-black">
                   {authorName || "Writora Author"}
                 </p>
@@ -250,9 +262,54 @@ const BlogDetails = () => {
             <span className="h-0 flex-1 border-t-2 border-dashed border-[#202020]/30" />
           </div>
 
-          <div className="whitespace-pre-wrap break-words text-base font-medium leading-[1.95] text-[#3D3B36] sm:text-lg sm:leading-[2]">
-            {blog.content}
-          </div>
+          <article
+            ref={contentRef}
+            className="tiptap-content"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(blog.content || ""),
+            }}
+          />
+          {/* Content CSS for tiptap editor */}
+          <style>
+            {`.tiptap-content {
+              line-height: 1.85;
+              overflow-wrap: anywhere;
+            }
+
+            .tiptap-content p {
+              margin-bottom: 1.25rem;
+            }
+
+            .tiptap-content pre {
+              overflow-x: auto;
+              padding: 1.25rem;
+              margin: 1.5rem 0;
+              border: 2px solid #202020;
+              border-radius: 12px;
+              background: #202020;
+              color: #fdfdf1;
+            }
+
+            .tiptap-content pre code {
+              background: transparent;
+              color: inherit;
+              border: none;
+              padding: 0;
+            }
+
+            .tiptap-content blockquote {
+              margin: 1.5rem 0;
+              padding: 0.75rem 1rem;
+              border-left: 4px solid #ec5e27;
+              background: #fdf5e9;
+            }
+
+            .tiptap-content img {
+              max-width: 100%;
+              height: auto;
+              border-radius: 12px;
+            }`}
+          </style>
 
           {Array.isArray(blog.tags) && blog.tags.length > 0 && (
             <div className="mt-12 border-t-2 border-[#202020] pt-6">
@@ -318,9 +375,7 @@ const BlogDetails = () => {
           </div>
 
           <div className="border-2 border-[#202020] bg-[#F2CB57] p-4">
-            <p className="text-lg font-black leading-tight">
-              Got an idea?
-            </p>
+            <p className="text-lg font-black leading-tight">Got an idea?</p>
             <p className="mt-2 text-xs font-semibold leading-5 text-[#4D4634]">
               Turn your thoughts into your next story.
             </p>
